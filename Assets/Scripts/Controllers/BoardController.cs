@@ -1,5 +1,4 @@
-﻿using DG.Tweening;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +29,10 @@ public class BoardController : MonoBehaviour
     private bool m_hintIsShown;
 
     private bool m_gameOver;
+    
+    private Vector2 _dragStartPos;
+    
+    private float _dragThreshold;
 
     public void StartGame(GameManager gameManager, GameSettings gameSettings)
     {
@@ -43,6 +46,7 @@ public class BoardController : MonoBehaviour
 
         m_board = new Board(this.transform, gameSettings);
 
+        _dragThreshold = 0.5f;
         Fill();
     }
 
@@ -72,8 +76,7 @@ public class BoardController : MonoBehaviour
 
     public void Update()
     {
-        if (m_gameOver) return;
-        if (IsBusy) return;
+        if (m_gameOver || IsBusy) return;
 
         if (!m_hintIsShown)
         {
@@ -84,28 +87,48 @@ public class BoardController : MonoBehaviour
                 ShowHint();
             }
         }
+        
+        var isMouseDown = Input.GetMouseButtonDown(0);
+        var isMouseHeld = Input.GetMouseButton(0);
+        var isMouseUp   = Input.GetMouseButtonUp(0);
+        
+        if (!isMouseDown && !isMouseHeld && !isMouseUp)
+            return;
+        
+        var mouseWorldPosition = m_cam.ScreenToWorldPoint(Input.mousePosition);
+        var hit = Physics2D.Raycast(mouseWorldPosition, Vector2.zero);
 
-        if (Input.GetMouseButtonDown(0))
+
+        if (isMouseDown)
         {
-            var hit = Physics2D.Raycast(m_cam.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
             if (hit.collider != null)
             {
-                m_isDragging = true;
                 m_hitCollider = hit.collider;
+                _dragStartPos = mouseWorldPosition;
+            }
+            else
+            {
+                m_hitCollider = null;
+                return;
             }
         }
+        
+        if (isMouseHeld && m_hitCollider != null && !m_isDragging)
+        {
+            var dist = Vector2.Distance(mouseWorldPosition, _dragStartPos);
+            m_isDragging = dist > _dragThreshold;
+        }
 
-        if (Input.GetMouseButtonUp(0))
+        if (isMouseUp)
         {
             ResetRayCast();
         }
 
-        if (Input.GetMouseButton(0) && m_isDragging)
+        if (isMouseHeld && m_isDragging && m_hitCollider != null)
         {
-            var hit = Physics2D.Raycast(m_cam.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
             if (hit.collider != null)
             {
-                if (m_hitCollider != null && m_hitCollider != hit.collider)
+                if (m_hitCollider != hit.collider)
                 {
                     StopHints();
 

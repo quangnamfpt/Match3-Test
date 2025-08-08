@@ -1,9 +1,9 @@
 ﻿using DG.Tweening;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Utilities;
 
 public class Board
 {
@@ -42,12 +42,14 @@ public class Board
     private void CreateBoard()
     {
         Vector3 origin = new Vector3(-boardSizeX * 0.5f + 0.5f, -boardSizeY * 0.5f + 0.5f, 0f);
-        GameObject prefabBG = Resources.Load<GameObject>(Constants.PREFAB_CELL_BACKGROUND);
+        //GameObject prefabBG = Resources.Load<GameObject>(Constants.PREFAB_CELL_BACKGROUND);
+        var prefabBG = PrefabCache.Load(Constants.PREFAB_CELL_BACKGROUND);
         for (int x = 0; x < boardSizeX; x++)
         {
             for (int y = 0; y < boardSizeY; y++)
             {
-                GameObject go = GameObject.Instantiate(prefabBG);
+                //GameObject go = GameObject.Instantiate(prefabBG);
+                var go = SimplePool.Spawn(prefabBG, Vector3.zero);
                 go.transform.position = origin + new Vector3(x, y, 0f);
                 go.transform.SetParent(m_root);
 
@@ -79,7 +81,8 @@ public class Board
             for (int y = 0; y < boardSizeY; y++)
             {
                 Cell cell = m_cells[x, y];
-                NormalItem item = new NormalItem();
+                //NormalItem item = new NormalItem();
+                var item = GameManager.Instance.NormalItemPool.Get();
 
                 List<NormalItem.eNormalType> types = new List<NormalItem.eNormalType>();
                 if (cell.NeighbourBottom != null)
@@ -145,7 +148,8 @@ public class Board
                 Cell cell = m_cells[x, y];
                 if (!cell.IsEmpty) continue;
 
-                NormalItem item = new NormalItem();
+                //NormalItem item = new NormalItem();
+                var item = GameManager.Instance.NormalItemPool.Get();
 
                 item.SetType(Utils.GetRandomNormalType());
                 item.SetView();
@@ -260,7 +264,9 @@ public class Board
     {
         eMatchDirection dir = GetMatchDirection(matches);
 
-        BonusItem item = new BonusItem();
+        //BonusItem item = new BonusItem();
+        var item = GameManager.Instance.BonusItemPool.Get();
+        
         switch (dir)
         {
             case eMatchDirection.ALL:
@@ -667,9 +673,19 @@ public class Board
             for (int y = 0; y < boardSizeY; y++)
             {
                 Cell cell = m_cells[x, y];
-                cell.Clear();
+                //cell.Clear();
+                
+                if (cell.Item is NormalItem normal)
+                {
+                    GameManager.Instance.NormalItemPool.Release(normal);
+                }
+                else if (cell.Item is BonusItem bonus)
+                {
+                    GameManager.Instance.BonusItemPool.Release(bonus);
+                }
 
-                GameObject.Destroy(cell.gameObject);
+                //GameObject.Destroy(cell.gameObject);
+                SimplePool.Despawn(cell.gameObject);
                 m_cells[x, y] = null;
             }
         }

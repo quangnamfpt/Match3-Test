@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using Utilities;
 
 [Serializable]
 public class Item
@@ -12,7 +13,7 @@ public class Item
     public Transform View { get; private set; }
 
 
-    public virtual void SetView()
+    /*public virtual void SetView()
     {
         string prefabname = GetPrefabName();
 
@@ -24,6 +25,25 @@ public class Item
                 View = GameObject.Instantiate(prefab).transform;
             }
         }
+    }*/
+    
+    //New
+    public virtual void SetView()
+    {
+        var prefabName = GetPrefabName();
+
+        if (string.IsNullOrEmpty(prefabName)) return;
+        //GameObject prefab = Resources.Load<GameObject>(prefabname);
+        var prefab = PrefabCache.Load(prefabName);
+
+        if (!prefab) return;
+            
+        //View = GameObject.Instantiate(prefab).transform;
+        View = SimplePool.Spawn(prefab, Vector3.zero).transform;
+        View.localScale = Vector3.one;
+        
+        /*var sr = View.GetComponent<SpriteRenderer>();
+        sr.sprite = MainMenuController.Instance.Item_Data.GetSprite(ItemType);*/
     }
 
     protected virtual string GetPrefabName() { return string.Empty; }
@@ -96,12 +116,14 @@ public class Item
 
     internal virtual void ExplodeView()
     {
+        StopAnimateForHint();
         if (View)
         {
             View.DOScale(0.1f, 0.1f).OnComplete(
                 () =>
                 {
-                    GameObject.Destroy(View.gameObject);
+                    //GameObject.Destroy(View.gameObject);
+                    SimplePool.Despawn(View.gameObject);
                     View = null;
                 }
                 );
@@ -112,6 +134,7 @@ public class Item
 
     internal void AnimateForHint()
     {
+        StopAnimateForHint();
         if (View)
         {
             View.DOPunchScale(View.localScale * 0.1f, 0.1f).SetLoops(-1);
@@ -132,8 +155,14 @@ public class Item
 
         if (View)
         {
-            GameObject.Destroy(View.gameObject);
+            //GameObject.Destroy(View.gameObject);
+            SimplePool.Despawn(View.gameObject);
             View = null;
         }
+    }
+    
+    public virtual void Reset()
+    {
+        View = null;
     }
 }

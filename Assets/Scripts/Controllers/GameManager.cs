@@ -1,10 +1,10 @@
 ﻿using DG.Tweening;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using Utilities;
 
-public class GameManager : MonoBehaviour
+public class GameManager : SingletonX<GameManager>
 {
     public event Action<eStateGame> StateChangedAction = delegate { };
 
@@ -44,6 +44,13 @@ public class GameManager : MonoBehaviour
     private UIMainManager m_uiMenu;
 
     private LevelCondition m_levelCondition;
+    
+    private PoolItemHandle<NormalItem> _normalItemPool;
+    
+    private PoolItemHandle<BonusItem> _bonusItemPool;
+    
+    public PoolItemHandle<NormalItem> NormalItemPool => _normalItemPool;
+    public PoolItemHandle<BonusItem> BonusItemPool => _bonusItemPool;
 
     private void Awake()
     {
@@ -53,6 +60,10 @@ public class GameManager : MonoBehaviour
 
         m_uiMenu = FindObjectOfType<UIMainManager>();
         m_uiMenu.Setup(this);
+        
+        var boardSize = m_gameSettings.BoardSizeX * m_gameSettings.BoardSizeY;
+        _normalItemPool = new PoolItemHandle<NormalItem>(boardSize);
+        _bonusItemPool  = new PoolItemHandle<BonusItem>(5);
     }
 
     void Start()
