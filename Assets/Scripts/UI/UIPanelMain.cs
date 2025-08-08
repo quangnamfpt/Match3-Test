@@ -9,6 +9,8 @@ public class UIPanelMain : MonoBehaviour, IMenu
     [SerializeField] private Button btnTimer;
 
     [SerializeField] private Button btnMoves;
+    
+    [SerializeField] private Button btnRestart;
 
     private UIMainManager m_mngr;
 
@@ -16,12 +18,14 @@ public class UIPanelMain : MonoBehaviour, IMenu
     {
         btnMoves.onClick.AddListener(OnClickMoves);
         btnTimer.onClick.AddListener(OnClickTimer);
+        btnRestart.onClick.AddListener(OnClickRestart);
     }
 
     private void OnDestroy()
     {
         if (btnMoves) btnMoves.onClick.RemoveAllListeners();
         if (btnTimer) btnTimer.onClick.RemoveAllListeners();
+        if (btnRestart) btnRestart.onClick.RemoveAllListeners();
     }
 
     public void Setup(UIMainManager mngr)
@@ -37,6 +41,11 @@ public class UIPanelMain : MonoBehaviour, IMenu
     private void OnClickMoves()
     {
         m_mngr.LoadLevelMoves();
+    }
+    
+    private void OnClickRestart()
+    {
+        m_mngr.RestartLevel();
     }
 
     public void Show()

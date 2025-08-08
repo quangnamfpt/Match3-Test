@@ -51,6 +51,8 @@ public class GameManager : SingletonX<GameManager>
     
     public PoolItemHandle<NormalItem> NormalItemPool => _normalItemPool;
     public PoolItemHandle<BonusItem> BonusItemPool => _bonusItemPool;
+    
+    private eLevelMode m_lastLevelMode;
 
     private void Awake()
     {
@@ -92,8 +94,16 @@ public class GameManager : SingletonX<GameManager>
         }
     }
 
+    public void RestartLevel()
+    {
+        ClearLevel();
+        LoadLevel(m_lastLevelMode);
+    }
+    
     public void LoadLevel(eLevelMode mode)
     {
+        m_lastLevelMode = mode;
+
         m_boardController = new GameObject("BoardController").AddComponent<BoardController>();
         m_boardController.StartGame(this, m_gameSettings);
 
