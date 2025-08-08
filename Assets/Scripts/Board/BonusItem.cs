@@ -5,12 +5,12 @@ using UnityEngine;
 
 public class BonusItem : Item
 {
-    public enum eBonusType
+    /*public enum eBonusType
     {
         NONE,
-        HORIZONTAL,
-        VERTICAL,
-        ALL
+        BONUS_HORIZONTAL,
+        BONUS_VERTICAL,
+        BONUS_ALL
     }
 
     public eBonusType ItemType;
@@ -18,22 +18,22 @@ public class BonusItem : Item
     public void SetType(eBonusType type)
     {
         ItemType = type;
-    }
+    }*/
 
     protected override string GetPrefabName()
     {
         string prefabname = string.Empty;
         switch (ItemType)
         {
-            case eBonusType.NONE:
+            case eItemType.NONE:
                 break;
-            case eBonusType.HORIZONTAL:
+            case eItemType.BONUS_HORIZONTAL:
                 prefabname = Constants.PREFAB_BONUS_HORIZONTAL;
                 break;
-            case eBonusType.VERTICAL:
+            case eItemType.BONUS_VERTICAL:
                 prefabname = Constants.PREFAB_BONUS_VERTICAL;
                 break;
-            case eBonusType.ALL:
+            case eItemType.BONUS_ALL:
                 prefabname = Constants.PREFAB_BONUS_BOMB;
                 break;
         }
@@ -59,13 +59,13 @@ public class BonusItem : Item
     {
         switch (ItemType)
         {
-            case eBonusType.HORIZONTAL:
+            case eItemType.BONUS_HORIZONTAL:
                 ExplodeHorizontalLine();
                 break;
-            case eBonusType.VERTICAL:
+            case eItemType.BONUS_VERTICAL:
                 ExplodeVerticalLine();
                 break;
-            case eBonusType.ALL:
+            case eItemType.BONUS_ALL:
                 ExplodeBomb();
                 break;
 

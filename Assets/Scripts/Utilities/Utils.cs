@@ -1,27 +1,40 @@
 ﻿using System;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Linq;
 using URandom = UnityEngine.Random;
 
-public class Utils
+namespace Utilities
 {
-    public static NormalItem.eNormalType GetRandomNormalType()
+    public class Utils
     {
-        Array values = Enum.GetValues(typeof(NormalItem.eNormalType));
-        NormalItem.eNormalType result = (NormalItem.eNormalType)values.GetValue(URandom.Range(0, values.Length));
+        public static List<Item.eItemType> GetAllNormalTypes()
+        {
+            return Enum.GetValues(typeof(Item.eItemType))
+                .Cast<Item.eItemType>()
+                .Where(t => t.ToString().StartsWith("NORMAL_TYPE"))
+                .ToList();
+        }
 
-        return result;
-    }
+        public static Item.eItemType GetRandomNormalType()
+        {
+            var normalTypes = GetAllNormalTypes();
+            var index = URandom.Range(0, normalTypes.Count);
+            return normalTypes[index];
+        }
 
-    public static NormalItem.eNormalType GetRandomNormalTypeExcept(NormalItem.eNormalType[] types)
-    {
-        List<NormalItem.eNormalType> list = Enum.GetValues(typeof(NormalItem.eNormalType)).Cast<NormalItem.eNormalType>().Except(types).ToList();
+        public static Item.eItemType GetRandomNormalTypeExcept(Item.eItemType[] excludedTypes)
+        {
+            var normalTypes = GetAllNormalTypes()
+                .Except(excludedTypes)
+                .ToList();
 
-        int rnd = URandom.Range(0, list.Count);
-        NormalItem.eNormalType result = list[rnd];
+            if (normalTypes.Count == 0)
+            {
+                return GetRandomNormalType();
+            }
 
-        return result;
+            var index = URandom.Range(0, normalTypes.Count);
+            return normalTypes[index];
+        }
     }
 }

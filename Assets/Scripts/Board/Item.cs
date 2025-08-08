@@ -8,6 +8,28 @@ using Utilities;
 [Serializable]
 public class Item
 {
+    public enum eItemType
+    {
+        NONE,
+        NORMAL_TYPE_ONE,
+        NORMAL_TYPE_TWO,
+        NORMAL_TYPE_THREE,
+        NORMAL_TYPE_FOUR,
+        NORMAL_TYPE_FIVE,
+        NORMAL_TYPE_SIX,
+        NORMAL_TYPE_SEVEN,
+        BONUS_HORIZONTAL,
+        BONUS_VERTICAL,
+        BONUS_ALL,
+    }
+    
+    public eItemType ItemType;
+
+    public virtual void SetType(eItemType type)
+    {
+        ItemType = type;
+    }
+    
     public Cell Cell { get; private set; }
 
     public Transform View { get; private set; }
@@ -42,8 +64,8 @@ public class Item
         View = SimplePool.Spawn(prefab, Vector3.zero).transform;
         View.localScale = Vector3.one;
         
-        /*var sr = View.GetComponent<SpriteRenderer>();
-        sr.sprite = MainMenuController.Instance.Item_Data.GetSprite(ItemType);*/
+        var sr = View.GetComponent<SpriteRenderer>();
+        sr.sprite = MainMenuController.Instance.Item_Data.GetSprite(ItemType);
     }
 
     protected virtual string GetPrefabName() { return string.Empty; }
