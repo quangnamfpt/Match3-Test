@@ -137,21 +137,64 @@ public class Board
             }
         }
     }
-
+    
+    private readonly Dictionary<Item.eItemType, int> _itemCountsCache = new Dictionary<Item.eItemType, int>();
+    private readonly HashSet<Item.eItemType> _surroundingCache = new HashSet<Item.eItemType>();
 
     internal void FillGapsWithNewItems()
     {
-        for (int x = 0; x < boardSizeX; x++)
+        _itemCountsCache.Clear();
+        for (var x = 0; x < boardSizeX; x++)
         {
-            for (int y = 0; y < boardSizeY; y++)
+            for (var y = 0; y < boardSizeY; y++)
             {
-                Cell cell = m_cells[x, y];
+                if (m_cells[x, y].Item is NormalItem normal)
+                {
+                    var type = normal.ItemType;
+                    if (_itemCountsCache.TryGetValue(type, out int count))
+                        _itemCountsCache[type] = count + 1;
+                    else
+                        _itemCountsCache[type] = 1;
+                }
+            }
+        }
+
+        var allTypes = Utils.GetAllNormalTypes();
+
+        for (var x = 0; x < boardSizeX; x++)
+        {
+            for (var y = 0; y < boardSizeY; y++)
+            {
+                var cell = m_cells[x, y];
                 if (!cell.IsEmpty) continue;
 
-                //NormalItem item = new NormalItem();
-                var item = GameManager.Instance.NormalItemPool.Get();
+                _surroundingCache.Clear();
 
-                item.SetType(Utils.GetRandomNormalType());
+                if (cell.NeighbourUp?.Item is NormalItem up) _surroundingCache.Add(up.ItemType);
+                if (cell.NeighbourBottom?.Item is NormalItem bottom) _surroundingCache.Add(bottom.ItemType);
+                if (cell.NeighbourLeft?.Item is NormalItem left) _surroundingCache.Add(left.ItemType);
+                if (cell.NeighbourRight?.Item is NormalItem right) _surroundingCache.Add(right.ItemType);
+                
+                var chosenType = Item.eItemType.NORMAL_TYPE_ONE;
+                var minCount = int.MaxValue;
+
+                foreach (var t in allTypes)
+                {
+                    if (_surroundingCache.Contains(t)) continue;
+
+                    var count = _itemCountsCache.TryGetValue(t, out var c) ? c : 0;
+                    if (count < minCount)
+                    {
+                        minCount = count;
+                        chosenType = t;
+                    }
+                }
+
+                if (minCount == int.MaxValue)
+                    chosenType = Utils.GetRandomNormalType();
+
+                var item = GameManager.Instance.NormalItemPool.Get();
+                item.SetType(chosenType);
                 item.SetView();
                 item.SetViewRoot(m_root);
 
@@ -160,6 +203,7 @@ public class Board
             }
         }
     }
+
 
     internal void ExplodeAllItems()
     {
