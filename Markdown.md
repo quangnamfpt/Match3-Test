@@ -12,6 +12,8 @@
 
 Nhược điểm
 
+
+
 -Load liên tục từ Resources.
 
 -Cải thiện hiệu suât bằng Object Pooling.
@@ -22,6 +24,8 @@ Nhược điểm
 
 -GameManager phụ thuộc trực tiếp vào nhiều class
 -Quản lý GC chưa tốt
+
+-Không batching draw calls cho sprites
 
 
 
@@ -36,5 +40,5 @@ Suggest
 -Áp dụng MVC/MVVM để tách biệt UI logic.
 -Áp dung Dependency Injection
 
-
+-Dùng atlas cho tất cả item sprite
 
